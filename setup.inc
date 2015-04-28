@@ -1,0 +1,259 @@
+#!/bin/bash -eEu
+
+readonly OSNAME=$(uname -s)
+readonly ARCH=$(uname -m)
+
+case "$OSNAME" in
+    Linux)
+        BIN_WHICH="/dev/null"
+        if [ -e "/bin/which" ]; then
+          BIN_WHICH="/bin/which"
+        elif [ -e "/usr/bin/which" ]; then
+          BIN_WHICH="/usr/bin/which"
+        fi
+        which()
+        {
+          "$BIN_WHICH" --skip-alias --skip-functions "$@"
+        }
+        readlink()
+        {
+          /bin/readlink -nf "$@"
+        }
+        perlgrep()
+        {
+          /bin/grep -P -o "$@"
+        }
+        sha256sum()
+        {
+          /usr/bin/sha256sum "$@"
+        }
+        sha1sum()
+        {
+          /usr/bin/sha1sum "$@"
+        }
+        sed_inplace()
+        {
+          /bin/sed -i -e "$@"
+        }
+        sed_inplace_r()
+        {
+          /bin/sed -i -r "$@"
+        }
+        sed_inplace_sudo()
+        {
+          sudo /bin/sed -i -e "$@"
+        }
+        sed_inplace_r_sudo()
+        {
+          sudo /bin/sed -i -r "$@"
+        }
+        sed_extended()
+        {
+          /bin/sed -r "$@"
+        }
+        echo "Detected Linux..."
+        ;;
+    Darwin)
+      echo "Detected Mac OS X (Darwin)..."
+      which()
+      {
+        set -eEu
+        /usr/bin/which "$@"
+      }
+      readlink()
+      {
+        set -eEu
+        local P="$1"
+        P_DIR=""
+        P_FILE=""
+        if [ -e "$P" ]; then
+        if [ -h "$P" ]; then
+            P="$(dirname "$P")/$(/usr/bin/readlink "$P")"
+        fi
+        if [ -d "$P" ]; then
+            P="$(cd "$P" >/dev/null 2>&1 && pwd -P)"
+            echo -n "$P"
+            return 0
+        fi
+        fi
+        P_DIR="$(dirname "$P" 2>/dev/null)"
+        P_FILE="${P#$P_DIR/}"
+        P_DIR="$(cd "$P_DIR" >/dev/null 2>&1 && pwd -P)"
+        echo -n "$P_DIR/$P_FILE"
+      }
+      perlgrep()
+      {
+        set -eEu
+        perl -le'$found=1; while(<>) { while( $string = m{'"$@"'}g ) { print $&; $found=0; } } exit $found;'
+      }
+      sha256sum()
+      {
+        set -eEu
+        /usr/bin/shasum -a256 "$@"
+      }
+      sha1sum()
+      {
+        /usr/bin/shasum -a1 "$@"
+      }
+      base64()
+      {
+        set -eEu
+        /usr/bin/base64
+      }
+      sed_inplace()
+      {
+        set -eEu
+        /usr/bin/sed -i "" "$@"
+      }
+      sed_inplace_r()
+      {
+        sed_inplace "$@"
+      }
+      sed_inplace_sudo()
+      {
+        set -eEu
+        sudo /usr/bin/sed -i "" "$@"
+      }
+      sed_inplace_r_sudo()
+      {
+        sed_inplace_sudo "$@"
+      }
+      sed_extended()
+      {
+        set -eEu
+        /usr/bin/sed -E "$@"
+      }
+      ;;
+    *)
+      echo "Linux or Mac OS X only for now! $OSNAME is not yet supported."
+      exit 1
+      ;;
+esac
+
+readonly FILE_TS="date +%FT%H-%M-%S"
+#
+# $1 - file name
+# $2 - use sudo (optional, set to any non-zero value)
+#
+function backup-file()
+{
+    set -eEu
+
+    if [ ! -e "$1" ]; then
+    return 0
+    fi
+
+    local FILE="$(readlink "$1")"
+    local FILE_NAME="${FILE##*/}"
+
+    local SUDO=""
+    if [ -n "${2:-}" ]; then
+    SUDO="sudo"
+    fi
+
+    BAK_FILE="$(dirname "$FILE")/$FILE_NAME.$($FILE_TS)${FILE_EXT:+.$FILE_EXT}.bak"
+    $SUDO cp "$FILE" "$BAK_FILE"
+    for f in `find "$(dirname "$FILE")" -maxdepth 1 -type f \( -name "$FILE_NAME"'.????-??-??T??-??-??'.bak \
+        -o -name "$FILE_NAME"'.????-??-??-??-??-??'.bak \) | sort -r | tail -n +5`; do
+    $SUDO rm "$f"
+    done
+    echo -n "$BAK_FILE"
+}
+
+
+
+function install-pip-virtualenv()
+{
+    set -eEu
+
+    echo "Installing PIP" >&2
+    curl -L -s "https://bootstrap.pypa.io/get-pip.py" | sudo python
+
+    echo "Installing VirtualEnv" >&2
+    sudo pip install --upgrade virtualenv
+}
+
+function install-pyhome()
+{
+    set -eEu
+
+    ENV_NAME="${1:-$(git rev-parse --abbrev-ref HEAD)}"
+    rm -rf "$HOME/pyhome/$ENV_NAME" || :
+    mkdir -p "$HOME/pyhome/$ENV_NAME"
+    rm -rf "$HOME/pyhome/current" || :
+    (cd "$HOME/pyhome" && ln -s "$ENV_NAME" "current") || exit $?
+    (cd "$HOME/pyhome/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
+    echo "Created PyHome '$ENV_NAME' from '$SCRIPT_DIR'" >&2
+
+    virtualenv ~/pyhome/current
+}
+
+function configure-bash-profile()
+{
+    set -eEu
+
+    echo "Customizing Bash profile..."
+    BASH_PROFILE="$(echo ~)/.bash_profile"
+
+    BASH_PROFILE_BAK="$(backup-file "$BASH_PROFILE")"
+    if [ -f "$BASH_PROFILE" ]; then
+      sed_inplace_r "/# PyHome Customization/,/# End PyHome Customization/ d" "$BASH_PROFILE"
+    fi
+
+    cat >> "$BASH_PROFILE" <<EOF
+# PyHome Customization
+
+EOF
+    cat >> "$BASH_PROFILE" <<EOF
+
+PATH=\$HOME/pyhome/current/pyenv:\$PATH
+export PATH
+
+# End PyHome Customization
+EOF
+
+}
+
+function activate-venv()
+{
+    set -eEu
+
+    set +eEu
+    source ~/pyhome/current/bin/activate
+    set -eEu
+}
+
+function deactivate-venv()
+{
+    set -eEu
+
+    set +eEu
+    deactivate
+    set -eEu
+}
+
+function configure-default-venv()
+{
+    set -eEu
+
+    echo "Installing PyBuilder" >&2
+    pip install pybuilder
+
+    echo "Installing Flake8" >&2
+    pip install flake8
+
+    echo "Installing Coverage" >&2
+    pip install coverage
+
+    echo "Installing Coveralls" >&2
+    pip install coveralls
+
+    pip freeze > "$SCRIPT_DIR"/requirements.txt
+}
+
+function configure-venv()
+{
+    set -eEu
+
+    pip install -r "$SCRIPT_DIR"/requirements.txt
+}
