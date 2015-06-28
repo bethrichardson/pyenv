@@ -181,6 +181,7 @@ function install-pip-virtualenv()
       sudo python setup.py install
     )
     RESULT=$?
+    sudo rm -rf "$VENV_INSTALL_DIR"
     [ $RESULT -eq 0 ] || return $RESULT
 }
 
