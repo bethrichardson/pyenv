@@ -166,11 +166,22 @@ function install-pip-virtualenv()
 {
     set -eEu
 
-    echo "Installing PIP" >&2
-    curl -L -s "https://bootstrap.pypa.io/get-pip.py" | sudo python
-
     echo "Installing VirtualEnv" >&2
-    sudo pip install --upgrade virtualenv
+    VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
+    VENV_INSTALL_DIR="$(mktemp -d -t virtualenv)"
+    (
+      cd "$VENV_INSTALL_DIR"
+      curl -L -s "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-$VENV_VERSION.tar.gz" | \
+      tar -xz
+    )
+    RESULT=$?
+    [ $RESULT -eq 0 ] || return $RESULT
+    (
+      cd "$VENV_INSTALL_DIR/virtualenv-$VENV_VERSION"
+      sudo python setup.py install
+    )
+    RESULT=$?
+    [ $RESULT -eq 0 ] || return $RESULT
 }
 
 function install-pyhome()
