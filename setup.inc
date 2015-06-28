@@ -168,7 +168,7 @@ function install-pip-virtualenv()
 
     echo "Installing VirtualEnv" >&2
     VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
-    VENV_INSTALL_DIR="$(mktemp -d -t virtualenv)"
+    VENV_INSTALL_DIR="$(mktemp -d -t virtualenv.XXXXXXXXXX)"
     (
       cd "$VENV_INSTALL_DIR"
       curl -L -s "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-$VENV_VERSION.tar.gz" | \
