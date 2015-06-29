@@ -265,7 +265,7 @@ function configure-default-venv()
 
 function configure-venv()
 {
-    set -eEux
+    set -eEu
 
     pip install --upgrade -r "$SCRIPT_DIR"/requirements.txt
 }
