@@ -8,5 +8,6 @@ pep8
 sphinx
 
 PyYAML
+gunicorn
 requests
 voluptuous
