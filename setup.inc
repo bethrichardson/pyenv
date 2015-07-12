@@ -162,7 +162,7 @@ function backup-file()
 
 
 
-function install-pip-virtualenv()
+function install-virtualenv()
 {
     set -eEu
 
@@ -198,6 +198,7 @@ function install-pyhome()
     echo "Created PyHome '$ENV_NAME' from '$SCRIPT_DIR'" >&2
 
     virtualenv ~/pyhome/current
+    cp "$SCRIPT_DIR"/pip.conf ~/pyhome/current
 }
 
 function configure-bash-profile()

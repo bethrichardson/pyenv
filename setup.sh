@@ -5,7 +5,7 @@ SCRIPT_DIR="$(cd "$SCRIPT_DIR" && pwd -P)"
 
 source "$SCRIPT_DIR/setup.inc"
 
-install-pip-virtualenv
+install-virtualenv
 install-pyhome "${1:-}"
 configure-bash-profile
 activate-venv
