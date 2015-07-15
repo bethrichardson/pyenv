@@ -1,6 +1,7 @@
 pip
 wheel
 pybuilder
+mock
 unittest-xml-reporting
 coverage
 flake8
@@ -9,5 +10,8 @@ mock
 
 PyYAML
 gunicorn
+flask-sqlalchemy
+Flask-Restless
+sqlalchemy-migrate
 requests
 voluptuous
