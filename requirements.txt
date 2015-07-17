@@ -4,8 +4,8 @@ pybuilder
 unittest-xml-reporting
 coverage
 flake8
-pep8
 sphinx
+mock
 
 PyYAML
 gunicorn
