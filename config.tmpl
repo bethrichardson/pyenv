@@ -1,0 +1,9 @@
+server:
+    workers: 2
+    bind: 127.0.0.1:8001
+    accesslog: '{0}/logs/accesslog.log'
+    errorlog: '{0}/logs/errorlog.log'
+    loglevel: 'debug'
+database:
+    uri: 'sqlite:///{0}/db/app.db'
+    migrate_repo: '{0}/db_repository'

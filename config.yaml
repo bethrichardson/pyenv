@@ -1,9 +1,0 @@
-server:
-    workers: 2
-    bind: 127.0.0.1:8001
-    accesslog: '/Users/jrombs/logs/accesslog.log'
-    errorlog: '/Users/jrombs/logs/errorlog.log'
-    loglevel: 'debug'
-database:
-    uri: 'sqlite:////Users/jrombs/dev20/cschcs-manager/app.db'
-    migrate_repo: '/Users/jrombs/dev20/cschcs-manager/db_repository'
