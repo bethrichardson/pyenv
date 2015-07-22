@@ -6,7 +6,6 @@ unittest-xml-reporting
 coverage
 flake8
 sphinx
-mock
 
 PyYAML
 gunicorn
