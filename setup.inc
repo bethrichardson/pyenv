@@ -270,5 +270,20 @@ function configure-venv()
 {
     set -eEu
 
+    pip install --upgrade -r "$SCRIPT_DIR"/venv-requirements.txt
+    ## Temporary Hack for PyBuilder
+    PYB_INSTALL_DIR="$(mktemp -d -t pyb.XXXXXXXXXX)"
+    (
+      cd "$PYB_INSTALL_DIR"
+      git clone --depth=1 --single-branch --branch=issues_146_147 git://github.com/arcivanov/pybuilder .
+      ./build.py install_dependencies
+      ./build.py
+      cd target/dist/PyBuilder*
+      ./setup.py install
+    )
+    RESULT=$?
+    [ $RESULT -eq 0 ] || return $RESULT
+
+    ## END Temporary Hack for PyBuilder
     pip install --upgrade -r "$SCRIPT_DIR"/requirements.txt
 }

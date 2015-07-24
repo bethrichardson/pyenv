@@ -1,0 +1,4 @@
+# Requirements for essential VENV management tools
+
+pip
+wheel

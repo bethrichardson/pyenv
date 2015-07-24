@@ -1,6 +1,6 @@
-pip
-wheel
-pybuilder
+# General stack dependencies and build tools
+
+#pybuilder
 mock
 unittest-xml-reporting
 coverage
