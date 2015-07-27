@@ -275,7 +275,7 @@ function configure-venv()
     PYB_INSTALL_DIR="$(mktemp -d -t pyb.XXXXXXXXXX)"
     (
       cd "$PYB_INSTALL_DIR"
-      git clone --depth=1 --single-branch --branch=issues_146_147 git://github.com/arcivanov/pybuilder .
+      git clone --depth=1 --single-branch --branch=issue_150_151 git://github.com/arcivanov/pybuilder .
       ./build.py install_dependencies
       ./build.py
       cd target/dist/PyBuilder*
