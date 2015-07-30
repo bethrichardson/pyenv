@@ -1,6 +1,6 @@
 # General stack dependencies and build tools
 
-#pybuilder
+git+git://github.com/arcivanov/pybuilder@issue_150_151
 mock
 unittest-xml-reporting
 coverage
