@@ -1,13 +1,16 @@
-pip
-wheel
-pybuilder
+# General stack dependencies and build tools
+
+git+git://github.com/pybuilder/pybuilder
+mock
 unittest-xml-reporting
 coverage
 flake8
 sphinx
-mock
 
 PyYAML
 gunicorn
+flask-sqlalchemy
+Flask-Restless
+sqlalchemy-migrate
 requests
 voluptuous

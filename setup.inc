@@ -192,6 +192,8 @@ function install-pyhome()
     ENV_NAME="${1:-$(git rev-parse --abbrev-ref HEAD)}"
     rm -rf "$HOME/pyhome/$ENV_NAME" || :
     mkdir -p "$HOME/pyhome/$ENV_NAME"
+    mkdir -p "$HOME/pyhome/$ENV_NAME/logs"
+    mkdir -p "$HOME/pyhome/$ENV_NAME/db"
     rm -rf "$HOME/pyhome/current" || :
     (cd "$HOME/pyhome" && ln -s "$ENV_NAME" "current") || exit $?
     (cd "$HOME/pyhome/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
@@ -268,5 +270,6 @@ function configure-venv()
 {
     set -eEu
 
+    pip install --upgrade -r "$SCRIPT_DIR"/venv-requirements.txt
     pip install --upgrade -r "$SCRIPT_DIR"/requirements.txt
 }
