@@ -10,6 +10,7 @@ sphinx
 PyYAML
 gunicorn
 flask-sqlalchemy
+flask-restful
 Flask-Restless
 sqlalchemy-migrate
 requests

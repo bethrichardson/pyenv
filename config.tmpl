@@ -4,7 +4,8 @@ server:
     accesslog: '{0}/logs/accesslog.log'
     errorlog: '{0}/logs/errorlog.log'
     loglevel: 'debug'
-    apis: ["another_api.models", ]
+    model_apis: ["another_api.models", ]
+    resource_apis: ["another_api.resources", ]
 database:
     uri: 'sqlite:///{0}/db/app.db'
     migrate_repo: '{0}/db_repository'
