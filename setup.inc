@@ -189,7 +189,7 @@ function install-pyhome()
 {
     set -eEu
 
-    ENV_NAME="${1:-$(git rev-parse --abbrev-ref HEAD)}"
+    ENV_NAME="${1:-$(cd "$SCRIPT_DIR" && git rev-parse --abbrev-ref HEAD)}"
     rm -rf "$HOME/pyhome/$ENV_NAME" || :
     mkdir -p "$HOME/pyhome/$ENV_NAME"
     mkdir -p "$HOME/pyhome/$ENV_NAME/logs"
