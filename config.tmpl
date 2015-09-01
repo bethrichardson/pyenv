@@ -1,11 +1,14 @@
 server:
-    workers: 2
+    workers: 1
     bind: 127.0.0.1:8001
     accesslog: '{0}/logs/accesslog.log'
     errorlog: '{0}/logs/errorlog.log'
-    loglevel: 'debug'
+    application_log: '{0}/logs/applicationlog.log'
+    loglevel: 'info'
     model_apis: ["another_api.models", ]
     resource_apis: ["another_api.resources", ]
-database:
-    uri: 'sqlite:///{0}/db/app.db'
-    migrate_repo: '{0}/db_repository'
+    debug: True
+    loggers:
+        sqlalchemy.engine: DEBUG
+        sqlalchemy.orm: DEBUG
+database: {}
