@@ -1,6 +1,8 @@
 # General stack dependencies and build tools
 
-git+git://github.com/pybuilder/pybuilder
+#https://github.com/pybuilder/pybuilder/tarball/master
+pybuilder==0.11.0
+
 mock
 unittest-xml-reporting
 coverage
