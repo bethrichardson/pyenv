@@ -169,6 +169,10 @@ function install-virtualenv()
     echo "Installing VirtualEnv" >&2
     VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
     VENV_INSTALL_DIR="$(mktemp -d -t virtualenv.XXXXXXXXXX)"
+    if [ -n "${VIRTUAL_ENV:-}" ]; then
+      echo "Please deactivate VENV '$VIRTUAL_ENV' before (re-)installing!" >&2
+      exit 1
+    fi
     (
       cd "$VENV_INSTALL_DIR"
       curl -L -s "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-$VENV_VERSION.tar.gz" | \
@@ -272,4 +276,15 @@ function configure-venv()
 
     pip install --upgrade -r "$SCRIPT_DIR"/venv-requirements.txt
     pip install --upgrade -r "$SCRIPT_DIR"/requirements.txt
+}
+
+function configure-nodeenv()
+{
+    set -eEu
+
+    echo "Installing Node Env" >&2
+    nodeenv --verbose -p --prebuilt --iojs --node="$(cat "$SCRIPT_DIR/iojs-version")"
+    echo npm version $(npm --version)
+    echo nodejs version $(nodejs --version)
+    npm install -g code lab
 }
