@@ -17,3 +17,5 @@ Flask-Restless
 sqlalchemy-migrate
 requests
 voluptuous
+
+nodeenv
