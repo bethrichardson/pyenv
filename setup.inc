@@ -131,6 +131,12 @@ case "$OSNAME" in
 esac
 
 readonly FILE_TS="date +%FT%H-%M-%S"
+readonly PYTHON_USER_BASE=$(python <<EOF
+import site
+print(site.USER_BASE)
+EOF
+)
+
 #
 # $1 - file name
 # $2 - use sudo (optional, set to any non-zero value)
@@ -161,31 +167,31 @@ function backup-file()
 }
 
 
-
 function install-virtualenv()
 {
     set -eEu
 
-    echo "Installing VirtualEnv" >&2
-    VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
-    VENV_INSTALL_DIR="$(mktemp -d -t virtualenv.XXXXXXXXXX)"
     if [ -n "${VIRTUAL_ENV:-}" ]; then
       echo "Please deactivate VENV '$VIRTUAL_ENV' before (re-)installing!" >&2
       exit 1
     fi
+    echo "Installing VirtualEnv" >&2
+    VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
+    VENV_CACHE="$HOME/pyhome/venv-cache"
+    mkdir -p "$VENV_CACHE"
+    (
+      cd "$VENV_CACHE"
+      curl -L -s -z virtualenv-$VENV_VERSION.tar.gz -R -O "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-$VENV_VERSION.tar.gz"
+    )
+    VENV_INSTALL_DIR="$(mktemp -d -t virtualenv.XXXXXXXXXX)"
     (
       cd "$VENV_INSTALL_DIR"
-      curl -L -s "https://pypi.python.org/packages/source/v/virtualenv/virtualenv-$VENV_VERSION.tar.gz" | \
-      tar -xz
-    )
-    RESULT=$?
-    [ $RESULT -eq 0 ] || return $RESULT
-    (
+      tar -xzf "$VENV_CACHE/virtualenv-$VENV_VERSION.tar.gz"
       cd "$VENV_INSTALL_DIR/virtualenv-$VENV_VERSION"
-      sudo python setup.py install
+      python setup.py install --user
     )
     RESULT=$?
-    sudo rm -rf "$VENV_INSTALL_DIR"
+    rm -rf "$VENV_INSTALL_DIR"
     [ $RESULT -eq 0 ] || return $RESULT
 }
 
@@ -203,7 +209,7 @@ function install-pyhome()
     (cd "$HOME/pyhome/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
     echo "Created PyHome '$ENV_NAME' from '$SCRIPT_DIR'" >&2
 
-    virtualenv ~/pyhome/current
+    "$PYTHON_USER_BASE"/bin/virtualenv ~/pyhome/current
     cp "$SCRIPT_DIR"/pip.conf ~/pyhome/current
 }
 
