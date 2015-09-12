@@ -1,0 +1,23 @@
+#!/bin/bash
+
+echo "Activating MacPorts..."
+
+set_variable PATH MACPORTS_PATH '$VIRTUAL_ENV/bin:$VIRTUAL_ENV/sbin:$PATH'
+set_variable MANPATH MACPORTS_MANPATH '$VIRTUAL_ENV/share/man:$MANPATH'
+set_variable INFOPATH MACPORTS_INFOPATH '$VIRTUAL_ENV/share/info:$INFOPATH'
+
+sign_local_macports_repository() {
+    echo "Signing local MacPorts repository..."
+    for f in $(find "$PYHOME"/.macports/software -type f -name \*.tbz2); do
+        if [ \( ! -e "$f".rmd160 \) -o "${1:-}" == force ]; then
+          echo "Signing '$f'..."
+          openssl dgst -ripemd160 -sign "$PYHOME"/.macports/software_key.pem \
+            -passin file:"$PYHOME"/.macports/key_passphrase -out "$f".rmd160 "$f"
+        fi
+    done
+}
+
+sync_local_macports_repository() {
+    echo "Syncing to local MacPorts repository..."
+    rsync -ar "$VIRTUAL_ENV"/var/macports/software/ "$PYHOME"/.macports/software/
+}

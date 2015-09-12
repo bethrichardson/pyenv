@@ -1,0 +1,8 @@
+# Darwin/Linux <commands>
+# For Darwin commands are port commands to use
+# For Linux it's yum commands to use
+
+# PostgresSQL 9.4 
+Darwin  install postgresql94 postgresql94-doc
+Darwin  select postgresql postgresql94
+Linux   install postgresql94-server
