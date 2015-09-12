@@ -136,6 +136,7 @@ import site
 print(site.USER_BASE)
 EOF
 )
+readonly PYHOME="$HOME/pyhome"
 
 #
 # $1 - file name
@@ -177,7 +178,7 @@ function install-virtualenv()
     fi
     echo "Installing VirtualEnv" >&2
     VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
-    VENV_CACHE="$HOME/pyhome/venv-cache"
+    VENV_CACHE="$PYHOME/venv-cache"
     mkdir -p "$VENV_CACHE"
     (
       cd "$VENV_CACHE"
@@ -200,13 +201,13 @@ function install-pyhome()
     set -eEu
 
     ENV_NAME="${1:-$(cd "$SCRIPT_DIR" && git rev-parse --abbrev-ref HEAD)}"
-    rm -rf "$HOME/pyhome/$ENV_NAME" || :
-    mkdir -p "$HOME/pyhome/$ENV_NAME"
-    mkdir -p "$HOME/pyhome/$ENV_NAME/logs"
-    mkdir -p "$HOME/pyhome/$ENV_NAME/db"
-    rm -rf "$HOME/pyhome/current" || :
-    (cd "$HOME/pyhome" && ln -s "$ENV_NAME" "current") || exit $?
-    (cd "$HOME/pyhome/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
+    rm -rf "$PYHOME/$ENV_NAME" || :
+    mkdir -p "$PYHOME/$ENV_NAME"
+    mkdir -p "$PYHOME/$ENV_NAME/logs"
+    mkdir -p "$PYHOME/$ENV_NAME/db"
+    rm -rf "$PYHOME/current" || :
+    (cd "$PYHOME" && ln -s "$ENV_NAME" "current") || exit $?
+    (cd "$PYHOME/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
     echo "Created PyHome '$ENV_NAME' from '$SCRIPT_DIR'" >&2
 
     "$PYTHON_USER_BASE"/bin/virtualenv ~/pyhome/current
@@ -231,8 +232,7 @@ function configure-bash-profile()
 EOF
     cat >> "$BASH_PROFILE" <<EOF
 
-PATH=\$HOME/pyhome/current/pyenv:\$PATH
-export PATH
+alias pyenv="source ~/pyhome/current/bin/activate"
 
 # End PyHome Customization
 EOF
@@ -293,4 +293,23 @@ function configure-nodeenv()
     echo npm version $(npm --version)
     echo nodejs version $(nodejs --version)
     npm install -g code lab
+}
+
+function configure-brew()
+{
+    set -eEu
+
+    case "$OSNAME" in
+      Linux)
+        sudo yum -y -q groupinstall 'Development Tools'
+        sudo yum -y -q install curl git m4 ruby texinfo bzip2-devel curl-devel expat-devel ncurses-devel zlib-devel
+        ;;
+      Darwin)
+        :
+        ;;
+    esac
+    echo "Installing Brew" >&2
+    HOMEBREW_PREFIX="$VIRTUAL_ENV" \
+    HOMEBREW_CACHE="$PYHOME/.brew-cache" \
+    ruby brew.rb --batch
 }

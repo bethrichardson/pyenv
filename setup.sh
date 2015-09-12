@@ -11,4 +11,5 @@ configure-bash-profile
 activate-venv
 configure"${2:-}"-venv
 configure-nodeenv
+configure-brew
 deactivate-venv
