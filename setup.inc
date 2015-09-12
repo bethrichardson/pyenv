@@ -301,8 +301,8 @@ function configure-brew()
 
     case "$OSNAME" in
       Linux)
-        sudo yum -y -q groupinstall 'Development Tools'
-        sudo yum -y -q install curl git m4 ruby texinfo bzip2-devel curl-devel expat-devel ncurses-devel zlib-devel
+        sudo yum -y groupinstall 'Development Tools'
+        sudo yum -y install curl git m4 ruby texinfo bzip2-devel curl-devel expat-devel ncurses-devel zlib-devel
         ;;
       Darwin)
         :
