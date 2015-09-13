@@ -1,6 +1,6 @@
---- activate.orig	2015-09-13 01:22:34.000000000 -0400
-+++ activate	2015-09-13 01:53:57.000000000 -0400
-@@ -1,39 +1,58 @@
+--- activate.orig	2015-09-13 04:52:58.000000000 -0400
++++ activate	2015-09-13 05:03:10.000000000 -0400
+@@ -1,39 +1,68 @@
  # This file must be used with "source bin/activate" *from bash*
  # you cannot run it directly
  
@@ -64,6 +64,7 @@
 -        unset _OLD_VIRTUAL_PS1
 +deactivate () {
 +    if [ -n "$VIRTUAL_ENV" ]; then
++        local deactivate_script
 +        for deactivate_script in "$VIRTUAL_ENV/bin/ext.d/deactivate"*; do
 +            source "$deactivate_script"
 +        done
@@ -79,10 +80,19 @@
      fi
 +
 +    unset VIRTUAL_ENV
++}
++
++activate () {
++    local activate_script
++    for activate_script in "$VIRTUAL_ENV/bin/ext.d/activate"*; do
++        source "$activate_script"
++    done
++
++    unset -f activate
  }
  
  # unset irrelevant variables
-@@ -42,39 +61,6 @@
+@@ -42,39 +71,4 @@
  VIRTUAL_ENV="/Users/arcivanov/pyhome/current"
  export VIRTUAL_ENV
  
@@ -122,6 +132,4 @@
 -if [ -n "${BASH-}" -o -n "${ZSH_VERSION-}" ] ; then
 -    hash -r 2>/dev/null
 -fi
-+for activate_script in "$VIRTUAL_ENV/bin/ext.d/activate"*; do
-+    source "$activate_script"
-+done
++activate
