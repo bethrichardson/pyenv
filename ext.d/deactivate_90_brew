@@ -1,0 +1,4 @@
+restore_variable INFOPATH BREW_INFOPATH
+restore_variable MANPATH BREW_MANPATH
+restore_variable HOMEBREW_CACHE HOMEBREW_CACHE
+restore_variable HOMEBREW_PREFIX HOMEBREW_PREFIX

@@ -1,0 +1,27 @@
+set_variable PATH VIRTUAL_PATH '$VIRTUAL_ENV/bin:$PATH'
+set_variable PYTHONHOME VIRTUAL_PYTHONHOME ''
+
+if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT-}" ] ; then
+    if [ "x" != x ] ; then
+        NEW_PS1_VALUE="$PS1"
+    else
+      if [ "`basename \"$VIRTUAL_ENV\"`" = "__" ] ; then
+          # special case for Aspen magic directories
+          # see http://www.zetadev.com/software/aspen/
+          NEW_PS1_VALUE="[`basename \`dirname \"$VIRTUAL_ENV\"\``] $PS1"
+      else
+          NEW_PS1_VALUE="(`basename \"$VIRTUAL_ENV\"`)$PS1"
+      fi
+    fi
+    set_variable PS1 VIRTUAL_PS1 '$NEW_PS1_VALUE'
+    unset NEW_PS1_VALUE
+fi
+
+alias pydoc="python -m pydoc"
+
+# This should detect bash and zsh, which have a hash command that must
+# be called to get it to forget past commands.  Without forgetting
+# past commands the $PATH changes we made may not be respected
+if [ -n "${BASH-}" -o -n "${ZSH_VERSION-}" ] ; then
+    hash -r 2>/dev/null
+fi

@@ -212,6 +212,9 @@ function install-pyhome()
 
     "$PYTHON_USER_BASE"/bin/virtualenv ~/pyhome/current
     cp "$SCRIPT_DIR"/pip.conf ~/pyhome/current
+    mkdir -p "$PYHOME/$ENV_NAME/bin/ext.d"
+    cp "$SCRIPT_DIR/ext.d/"{de,}activate_*_venv "$PYHOME/$ENV_NAME/bin/ext.d/"
+    patch -d "$PYHOME/$ENV_NAME/bin" < "$SCRIPT_DIR/activate.patch"
 }
 
 function configure-bash-profile()
@@ -257,25 +260,6 @@ function deactivate-venv()
     set -eEu
 }
 
-function configure-default-venv()
-{
-    set -eEu
-
-    echo "Installing PyBuilder" >&2
-    pip install pybuilder
-
-    echo "Installing Flake8" >&2
-    pip install flake8
-
-    echo "Installing Coverage" >&2
-    pip install coverage
-
-    echo "Installing Coveralls" >&2
-    pip install coveralls
-
-    pip freeze > "$SCRIPT_DIR"/requirements.txt
-}
-
 function configure-venv()
 {
     set -eEu
@@ -289,10 +273,15 @@ function configure-nodeenv()
     set -eEu
 
     echo "Installing Node Env" >&2
+    cp "$VIRTUAL_ENV/bin/activate" "$VIRTUAL_ENV/bin/activate.bak"
+
     nodeenv --verbose -p --prebuilt --iojs --node="$(cat "$SCRIPT_DIR/iojs-version")"
     echo npm version $(npm --version)
     echo nodejs version $(nodejs --version)
     npm install -g code lab
+
+    mv "$VIRTUAL_ENV/bin/activate.bak" "$VIRTUAL_ENV/bin/activate"
+    cp "$SCRIPT_DIR/ext.d/"{de,}activate_*_node "$VIRTUAL_ENV/bin/ext.d/"
 }
 
 function configure-brew()
@@ -301,8 +290,8 @@ function configure-brew()
 
     case "$OSNAME" in
       Linux)
-        sudo yum -y groupinstall 'Development Tools'
-        sudo yum -y install curl git m4 ruby texinfo bzip2-devel curl-devel expat-devel ncurses-devel zlib-devel
+        sudo yum -y -q groupinstall 'Development Tools'
+        sudo yum -y -q install curl git m4 ruby texinfo bzip2-devel curl-devel expat-devel ncurses-devel zlib-devel
         ;;
       Darwin)
         :
@@ -310,6 +299,7 @@ function configure-brew()
     esac
     echo "Installing Brew" >&2
     HOMEBREW_PREFIX="$VIRTUAL_ENV" \
-    HOMEBREW_CACHE="$PYHOME/.brew-cache" \
+    HOMEBREW_CACHE="$HOMEBREW_PREFIX/../.brew-cache" \
     ruby brew.rb --batch
+    cp "$SCRIPT_DIR/ext.d/"{de,}activate_*_brew "$VIRTUAL_ENV/bin/ext.d/"
 }

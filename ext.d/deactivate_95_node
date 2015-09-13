@@ -1,0 +1,12 @@
+# reset old environment variables
+restore_variable npm_config_prefix npm_config_prefix
+restore_variable NPM_CONFIG_PREFIX NPM_CONFIG_PREFIX
+restore_variable NODE_PATH NODE_PATH
+restore_variable NODE_VIRTUAL_ENV NODE_VIRTUAL_ENV
+
+if [ ! "$1" = "nondestructive" ] ; then
+  # Self destruct!
+  unset -f freeze
+fi
+
+

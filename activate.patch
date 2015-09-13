@@ -1,0 +1,127 @@
+--- activate.orig	2015-09-13 01:22:34.000000000 -0400
++++ activate	2015-09-13 01:53:57.000000000 -0400
+@@ -1,39 +1,58 @@
+ # This file must be used with "source bin/activate" *from bash*
+ # you cannot run it directly
+ 
+-deactivate () {
+-    unset pydoc
+-
+-    # reset old environment variables
+-    if [ -n "${_OLD_VIRTUAL_PATH-}" ] ; then
+-        PATH="$_OLD_VIRTUAL_PATH"
+-        export PATH
+-        unset _OLD_VIRTUAL_PATH
++#
++# $1 - name of the variable to backup
++# $2 - name of the unique backup prefix
++# $3 - name of the new value to set
++#
++set_variable() {
++    eval "_OLD_$2=\"\$$1\""
++    eval "_OLD_${2}_WAS_SET=''"
++    if [ -n "${!1+x}" ]; then
++      eval "_OLD_${2}_WAS_SET=x"
+     fi
+-    if [ -n "${_OLD_VIRTUAL_PYTHONHOME-}" ] ; then
+-        PYTHONHOME="$_OLD_VIRTUAL_PYTHONHOME"
+-        export PYTHONHOME
+-        unset _OLD_VIRTUAL_PYTHONHOME
++    if [ -z "$3" ]; then
++      unset "$1"
++    else
++      eval "$1=\"$3\""
++      export "$1"
+     fi
++}
+ 
+-    # This should detect bash and zsh, which have a hash command that must
+-    # be called to get it to forget past commands.  Without forgetting
+-    # past commands the $PATH changes we made may not be respected
+-    if [ -n "${BASH-}" -o -n "${ZSH_VERSION-}" ] ; then
+-        hash -r 2>/dev/null
++#
++# $1 - name of the variable to restore
++# $2 - name of the unique backup prefix
++#
++restore_variable() {
++    local OLD_VAR_NAME="_OLD_$2"
++    local OLD_VAR_NAME_SET="_OLD_${2}_WAS_SET"
++    if [ -n "${!OLD_VAR_NAME+x}" ]; then
++        eval "$1=\"\$_OLD_${2}\""
++        export "$1"
++        if [ -z "${!OLD_VAR_NAME_SET}" ]; then
++            unset "$1"
++        fi
++        unset "_OLD_${2}_WAS_SET"
++        unset "_OLD_${2}"
+     fi
++}
+ 
+-    if [ -n "${_OLD_VIRTUAL_PS1-}" ] ; then
+-        PS1="$_OLD_VIRTUAL_PS1"
+-        export PS1
+-        unset _OLD_VIRTUAL_PS1
++deactivate () {
++    if [ -n "$VIRTUAL_ENV" ]; then
++        for deactivate_script in "$VIRTUAL_ENV/bin/ext.d/deactivate"*; do
++            source "$deactivate_script"
++        done
+     fi
+ 
+-    unset VIRTUAL_ENV
+     if [ ! "${1-}" = "nondestructive" ] ; then
+-    # Self destruct!
++        # Self destruct!
+         unset -f deactivate
++        unset -f set_variable
++        unset -f restore_variable
+     fi
++
++    unset VIRTUAL_ENV
+ }
+ 
+ # unset irrelevant variables
+@@ -42,39 +61,6 @@
+ VIRTUAL_ENV="/Users/arcivanov/pyhome/current"
+ export VIRTUAL_ENV
+ 
+-_OLD_VIRTUAL_PATH="$PATH"
+-PATH="$VIRTUAL_ENV/bin:$PATH"
+-export PATH
+-
+-# unset PYTHONHOME if set
+-# this will fail if PYTHONHOME is set to the empty string (which is bad anyway)
+-# could use `if (set -u; : $PYTHONHOME) ;` in bash
+-if [ -n "${PYTHONHOME-}" ] ; then
+-    _OLD_VIRTUAL_PYTHONHOME="$PYTHONHOME"
+-    unset PYTHONHOME
+-fi
+-
+-if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT-}" ] ; then
+-    _OLD_VIRTUAL_PS1="$PS1"
+-    if [ "x" != x ] ; then
+-        PS1="$PS1"
+-    else
+-    if [ "`basename \"$VIRTUAL_ENV\"`" = "__" ] ; then
+-        # special case for Aspen magic directories
+-        # see http://www.zetadev.com/software/aspen/
+-        PS1="[`basename \`dirname \"$VIRTUAL_ENV\"\``] $PS1"
+-    else
+-        PS1="(`basename \"$VIRTUAL_ENV\"`)$PS1"
+-    fi
+-    fi
+-    export PS1
+-fi
+-
+-alias pydoc="python -m pydoc"
+-
+-# This should detect bash and zsh, which have a hash command that must
+-# be called to get it to forget past commands.  Without forgetting
+-# past commands the $PATH changes we made may not be respected
+-if [ -n "${BASH-}" -o -n "${ZSH_VERSION-}" ] ; then
+-    hash -r 2>/dev/null
+-fi
++for activate_script in "$VIRTUAL_ENV/bin/ext.d/activate"*; do
++    source "$activate_script"
++done
