@@ -147,7 +147,7 @@ function backup-file()
     set -eEu
 
     if [ ! -e "$1" ]; then
-    return 0
+        return 0
     fi
 
     local FILE="$(readlink "$1")"
@@ -155,18 +155,31 @@ function backup-file()
 
     local SUDO=""
     if [ -n "${2:-}" ]; then
-    SUDO="sudo"
+        SUDO="sudo"
     fi
 
     BAK_FILE="$(dirname "$FILE")/$FILE_NAME.$($FILE_TS)${FILE_EXT:+.$FILE_EXT}.bak"
     $SUDO cp "$FILE" "$BAK_FILE"
     for f in `find "$(dirname "$FILE")" -maxdepth 1 -type f \( -name "$FILE_NAME"'.????-??-??T??-??-??'.bak \
         -o -name "$FILE_NAME"'.????-??-??-??-??-??'.bak \) | sort -r | tail -n +5`; do
-    $SUDO rm "$f"
+        $SUDO rm "$f"
     done
     echo -n "$BAK_FILE"
 }
 
+function install-prerequisites()
+{
+    set -eEu
+
+    case "$OSNAME" in
+      Linux)
+        sudo yum -y -q install curl patch git ruby
+        ;;
+      Darwin)
+        :
+        ;;
+    esac
+}
 
 function install-virtualenv()
 {
@@ -291,12 +304,13 @@ function configure-brew()
     case "$OSNAME" in
       Linux)
         sudo yum -y -q groupinstall 'Development Tools'
-        sudo yum -y -q install curl git m4 ruby texinfo bzip2-devel curl-devel expat-devel ncurses-devel zlib-devel
+        sudo yum -y -q install m4 texinfo bzip2-devel curl-devel expat-devel ncurses-devel zlib-devel
         ;;
       Darwin)
         :
         ;;
     esac
+
     echo "Installing Brew" >&2
     HOMEBREW_PREFIX="$VIRTUAL_ENV" \
     HOMEBREW_CACHE="$HOMEBREW_PREFIX/../.brew-cache" \
