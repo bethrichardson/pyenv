@@ -1,0 +1,27 @@
+#!/bin/bash
+
+echo "Activating PyEnv installer..."
+
+#
+# $1 - Package type (Linux/Darwin)
+# $2 - Commands
+#
+install_package() {
+    [ -n "${OSNAME:-}" ] || local OSNAME="$(uname -s)"
+    [ "$1" == "$OSNAME" ] || return 0
+
+    RESULT=0
+    case "$OSNAME" in
+        Linux)
+          echo "Running Linux yum $2 ..."
+          sudo yum -y $2 || RESULT=$?
+          ;;
+        Darwin)
+          echo "Running Darwin port $2 ..."
+          port $2 || RESULT=$?
+          sync_local_macports_repository
+          sign_local_macports_repository
+          ;;
+    esac
+    return $RESULT
+}

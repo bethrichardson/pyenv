@@ -1,0 +1,13 @@
+#!/bin/bash
+
+echo "Deactivating MacPorts..."
+
+restore_variable PATH MACPORTS_PATH
+restore_variable MANPATH MACPORTS_MANPATH
+restore_variable INFOPATH MACPORTS_INFOPATH
+
+if [ ! "$1" = "nondestructive" ] ; then
+  # Self destruct!
+  unset -f sync_local_macports_repository
+  unset -f sign_local_macports_repository
+fi

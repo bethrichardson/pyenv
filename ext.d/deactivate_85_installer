@@ -1,0 +1,8 @@
+#!/bin/bash
+
+echo "Deactivating PyEnv installer..."
+
+if [ ! "$1" = "nondestructive" ] ; then
+  # Self destruct!
+  unset -f install_package
+fi

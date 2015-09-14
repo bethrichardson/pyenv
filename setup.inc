@@ -136,6 +136,7 @@ import site
 print(site.USER_BASE)
 EOF
 )
+PYHOME="$HOME/pyhome"
 
 #
 # $1 - file name
@@ -146,7 +147,7 @@ function backup-file()
     set -eEu
 
     if [ ! -e "$1" ]; then
-    return 0
+        return 0
     fi
 
     local FILE="$(readlink "$1")"
@@ -154,30 +155,47 @@ function backup-file()
 
     local SUDO=""
     if [ -n "${2:-}" ]; then
-    SUDO="sudo"
+        SUDO="sudo"
     fi
 
     BAK_FILE="$(dirname "$FILE")/$FILE_NAME.$($FILE_TS)${FILE_EXT:+.$FILE_EXT}.bak"
     $SUDO cp "$FILE" "$BAK_FILE"
     for f in `find "$(dirname "$FILE")" -maxdepth 1 -type f \( -name "$FILE_NAME"'.????-??-??T??-??-??'.bak \
         -o -name "$FILE_NAME"'.????-??-??-??-??-??'.bak \) | sort -r | tail -n +5`; do
-    $SUDO rm "$f"
+        $SUDO rm "$f"
     done
     echo -n "$BAK_FILE"
 }
 
+function install-prerequisites()
+{
+    set -eEu
+
+    case "$OSNAME" in
+      Linux)
+        sudo yum -y -q install curl patch git
+        ;;
+      Darwin)
+        if [ -z "$(/usr/bin/xcode-select -print-path 2>/dev/null)" ]; then
+            echo "Please install Xcode or Command Line Tools first and try again (see popup)!" >&2
+            sudo /usr/bin/xcode-select --install
+            exit 1
+        fi
+        ;;
+    esac
+}
 
 function install-virtualenv()
 {
     set -eEu
 
     if [ -n "${VIRTUAL_ENV:-}" ]; then
-      echo "Please deactivate VENV '$VIRTUAL_ENV' before (re-)installing!" >&2
+      echo "Please deactivate VirtualEnv '$VIRTUAL_ENV' before (re-)installing!" >&2
       exit 1
     fi
     echo "Installing VirtualEnv" >&2
     VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
-    VENV_CACHE="$HOME/pyhome/venv-cache"
+    VENV_CACHE="$PYHOME/.venv-cache"
     mkdir -p "$VENV_CACHE"
     (
       cd "$VENV_CACHE"
@@ -200,17 +218,20 @@ function install-pyhome()
     set -eEu
 
     ENV_NAME="${1:-$(cd "$SCRIPT_DIR" && git rev-parse --abbrev-ref HEAD)}"
-    rm -rf "$HOME/pyhome/$ENV_NAME" || :
-    mkdir -p "$HOME/pyhome/$ENV_NAME"
-    mkdir -p "$HOME/pyhome/$ENV_NAME/logs"
-    mkdir -p "$HOME/pyhome/$ENV_NAME/db"
-    rm -rf "$HOME/pyhome/current" || :
-    (cd "$HOME/pyhome" && ln -s "$ENV_NAME" "current") || exit $?
-    (cd "$HOME/pyhome/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
+    rm -rf "$PYHOME/$ENV_NAME" || :
+    mkdir -p "$PYHOME/$ENV_NAME"
+    mkdir -p "$PYHOME/$ENV_NAME/logs"
+    mkdir -p "$PYHOME/$ENV_NAME/db"
+    rm -rf "$PYHOME/current" || :
+    (cd "$PYHOME" && ln -s "$ENV_NAME" "current") || exit $?
+    (cd "$PYHOME/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
     echo "Created PyHome '$ENV_NAME' from '$SCRIPT_DIR'" >&2
 
     "$PYTHON_USER_BASE"/bin/virtualenv ~/pyhome/current
     cp "$SCRIPT_DIR"/pip.conf ~/pyhome/current
+    mkdir -p "$PYHOME/$ENV_NAME/bin/ext.d"
+    cp "$SCRIPT_DIR/ext.d/"{de,}activate_*_venv "$PYHOME/$ENV_NAME/bin/ext.d/"
+    patch -d "$PYHOME/$ENV_NAME/bin" < "$SCRIPT_DIR/activate.patch"
 }
 
 function configure-bash-profile()
@@ -231,8 +252,7 @@ function configure-bash-profile()
 EOF
     cat >> "$BASH_PROFILE" <<EOF
 
-PATH=\$HOME/pyhome/current/pyenv:\$PATH
-export PATH
+alias pyenv="source ~/pyhome/current/bin/activate"
 
 # End PyHome Customization
 EOF
@@ -257,25 +277,6 @@ function deactivate-venv()
     set -eEu
 }
 
-function configure-default-venv()
-{
-    set -eEu
-
-    echo "Installing PyBuilder" >&2
-    pip install pybuilder
-
-    echo "Installing Flake8" >&2
-    pip install flake8
-
-    echo "Installing Coverage" >&2
-    pip install coverage
-
-    echo "Installing Coveralls" >&2
-    pip install coveralls
-
-    pip freeze > "$SCRIPT_DIR"/requirements.txt
-}
-
 function configure-venv()
 {
     set -eEu
@@ -288,9 +289,123 @@ function configure-nodeenv()
 {
     set -eEu
 
-    echo "Installing Node Env" >&2
+    echo "Installing NodeEnv..." >&2
+    cp "$VIRTUAL_ENV/bin/activate" "$VIRTUAL_ENV/bin/activate.bak"
+
     nodeenv --verbose -p --prebuilt --iojs --node="$(cat "$SCRIPT_DIR/iojs-version")"
     echo npm version $(npm --version)
     echo nodejs version $(nodejs --version)
     npm install -g code lab
+
+    mv "$VIRTUAL_ENV/bin/activate.bak" "$VIRTUAL_ENV/bin/activate"
+    install-venv-extension node
+}
+
+function configure-macports()
+{
+    set -eEu
+
+    if [ "$OSNAME" == Darwin ]; then # OSX-only
+        echo "Installing MacPorts..." >&2
+
+        mkdir -p "$PYHOME"/.macports/distfiles
+        mkdir -p "$PYHOME"/.macports/software
+        mkdir -p "$PYHOME"/.macports/sources
+
+        MACPORTS_VERSION="$(cat "$SCRIPT_DIR/macports-version")"
+        (
+            cd "$VENV_CACHE"
+            curl -L -s -z "MacPorts-$MACPORTS_VERSION.tar.bz2" -R -O "https://distfiles.macports.org/MacPorts/MacPorts-$MACPORTS_VERSION.tar.bz2"
+        )
+        RESULT=$?
+        [ $RESULT -eq 0 ] || return $RESULT
+
+        MACPORTS_INSTALL_DIR="$(mktemp -d -t macports.XXXXXXXXXX)"
+        (
+            cd "$MACPORTS_INSTALL_DIR"
+            tar -xf "$VENV_CACHE/MacPorts-$MACPORTS_VERSION.tar.bz2"
+            cd "MacPorts-$MACPORTS_VERSION"
+
+            PATH=/bin:/sbin:/usr/bin:/usr/sbin
+            export PATH
+            MP_PREFIX="$VIRTUAL_ENV"
+            (
+              ./configure --prefix="$MP_PREFIX" --with-applications-dir="$MP_PREFIX/Applications" \
+                  --with-install-user=$(id -un) --with-install-group=$(id -gn) --enable-readline
+              make
+              make install
+            ) > "$VIRTUAL_ENV"/logs/macports-build.log 2>&1
+            RESULT=$?
+            [ $RESULT -eq 0 ] || { tail "$VIRTUAL_ENV"/logs/macports-build.log ; echo "Please see more logs in "$VIRTUAL_ENV"/logs/macports-build.log" ; }
+            return $RESULT
+        )
+        RESULT=$?
+        rm -rf "$MACPORTS_INSTALL_DIR"
+        [ $RESULT -eq 0 ] || return $RESULT
+
+        rm -rf "$VIRTUAL_ENV"/var/macports/distfiles
+        rm -rf "$VIRTUAL_ENV"/var/macports/sources
+        ln -s "$PYHOME/.macports/distfiles" "$VIRTUAL_ENV"/var/macports/distfiles
+        ln -s "$PYHOME/.macports/sources" "$VIRTUAL_ENV"/var/macports/sources
+
+
+        if [ ! -e "$PYHOME"/.macports/software_key.pem ]; then
+            echo "macports" > "$PYHOME"/.macports/key_passphrase
+            echo "Creating MacPorts local repository PrivKey..."
+            openssl genrsa -des3 -out "$PYHOME"/.macports/software_key.pem -passout file:"$PYHOME"/.macports/key_passphrase 2048
+            chmod ug-w "$PYHOME"/.macports/software_key.pem
+            echo "Creating MacPorts local repository PubKey..."
+            openssl rsa -in "$PYHOME"/.macports/software_key.pem -passin file:"$PYHOME"/.macports/key_passphrase \
+                -pubout -out "$PYHOME"/.macports/software_pub_key.pem
+        fi
+
+        cat >> "$VIRTUAL_ENV"/etc/macports/macports.conf <<EOF
+startupitem_type      none
+startupitem_install   no
+EOF
+
+        cat >> "$VIRTUAL_ENV"/etc/macports/archive_sites.conf <<EOF
+name                    macports_archives
+
+name                    PyEnv
+urls                    file://$PYHOME/.macports/software
+prefix                  $VIRTUAL_ENV
+applications_dir        $VIRTUAL_ENV/Applications
+EOF
+
+        cat >> "$VIRTUAL_ENV"/etc/macports/pubkeys.conf <<EOF
+$PYHOME/.macports/software_pub_key.pem
+EOF
+
+        install-venv-extension macports
+        sign_local_macports_repository force
+        port sync
+    fi
+}
+
+function configure-installer()
+{
+    set -eEu
+
+    install-venv-extension installer
+}
+
+function install-binary-packages()
+{
+    set -eEu
+
+    while read OS COMMANDS; do
+        [ -n "$OS" -a "${OS:0:1}" != '#' ] || continue
+        install_package "$OS" "$COMMANDS"
+    done < "$SCRIPT_DIR/binary-packages"
+}
+
+function install-venv-extension() {
+    set -eEu
+
+    cp "$SCRIPT_DIR/ext.d/"{de,}activate_*_"$1" "$VIRTUAL_ENV/bin/ext.d/"
+
+    set +eEu
+    source "$VIRTUAL_ENV/bin/ext.d/"activate_*_"$1"
+    set -eEu
 }
