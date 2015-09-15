@@ -285,17 +285,27 @@ function configure-venv()
     pip install --upgrade -r "$SCRIPT_DIR"/requirements.txt
 }
 
+
+function assert-running-in-venv()
+{
+    set -eEu
+
+    [ -n "${VIRTUAL_ENV:-}" ] || { echo "Must be run in an activated VirtualEnv!" >&2; exit 1; }
+}
+
 function configure-nodeenv()
 {
     set -eEu
 
     echo "Installing NodeEnv..." >&2
+    assert-running-in-venv
+
     cp "$VIRTUAL_ENV/bin/activate" "$VIRTUAL_ENV/bin/activate.bak"
 
     nodeenv --verbose -p --prebuilt --iojs --node="$(cat "$SCRIPT_DIR/iojs-version")"
     echo npm version $(npm --version)
     echo nodejs version $(nodejs --version)
-    npm install -g code lab
+    npm install -g code lab gulp
 
     mv "$VIRTUAL_ENV/bin/activate.bak" "$VIRTUAL_ENV/bin/activate"
     install-venv-extension node
@@ -307,6 +317,7 @@ function configure-macports()
 
     if [ "$OSNAME" == Darwin ]; then # OSX-only
         echo "Installing MacPorts..." >&2
+        assert-running-in-venv
 
         mkdir -p "$PYHOME"/.macports/distfiles
         mkdir -p "$PYHOME"/.macports/software
@@ -387,12 +398,18 @@ function configure-installer()
 {
     set -eEu
 
+    echo "Installing PyEnv Installer..." >&2
+    assert-running-in-venv
+
     install-venv-extension installer
 }
 
 function install-binary-packages()
 {
     set -eEu
+
+    echo "Installing Binary Packages..." >&2
+    assert-running-in-venv
 
     while read OS COMMANDS; do
         [ -n "$OS" -a "${OS:0:1}" != '#' ] || continue
@@ -408,4 +425,62 @@ function install-venv-extension() {
     set +eEu
     source "$VIRTUAL_ENV/bin/ext.d/"activate_*_"$1"
     set -eEu
+}
+
+function install-frontend() {
+    set -eEu
+
+    echo "Installing HCS OS Frontend..." >&2
+    assert-running-in-venv
+
+    source "$SCRIPT_DIR"/frontend-versions
+
+    FRONTEND_LOCATION="${FRONTEND_LOCATION:-$VIRTUAL_ENV/var/hcsos}"
+    FRONTEND_EDGE="$FRONTEND_LOCATION"/edge
+    FRONTEND_API_PROXY="$FRONTEND_LOCATION"/api-proxy
+
+    rm -rf "$FRONTEND_LOCATION" || :
+    mkdir -p "$FRONTEND_LOCATION"
+    mkdir -p "$FRONTEND_EDGE"
+    mkdir -p "$FRONTEND_API_PROXY"
+
+    echo "Installing Web Frontend (HAPI Edge)..." >&2
+    git clone --depth=1 --branch="$HAPI_EDGE_VERSION" --single-branch ssh://git@github.com/cschcs/hapi-edge-poc "$FRONTEND_EDGE"
+    (
+        cd "$FRONTEND_EDGE"
+        npm install
+        gulp deploy
+    )
+    RESULT=$?
+    [ $RESULT -eq 0 ] || return $RESULT
+
+    FRONTEND_INSTALL_DIR="$(mktemp -d -t frontend.XXXXXXXXXX)"
+    (
+        cd "$FRONTEND_INSTALL_DIR"
+        git clone --depth=1 --branch="$MAIN_APP_VERSION" --single-branch ssh://git@github.com/cschcs/ng-main
+        git clone --depth=1 --branch="$AGILITY_X_VERSION" --single-branch ssh://git@github.com/cschcs/ng-marketplace
+
+        rsync -ar ng-main/dist/ngmain.js "$FRONTEND_EDGE"/public/app/
+        rsync -ar ng-main/dist/themes/"$UI_THEME".js "$FRONTEND_EDGE"/public/app/theme.js
+        rsync -ar ng-marketplace/distribute/assets/js/app.js "$FRONTEND_EDGE"/public/app/ngmarketplace.js
+
+        rsync -ar ng-marketplace/distribute/assets/ "$FRONTEND_EDGE"/public/assets/
+        rsync -ar ng-marketplace/distribute/fonts/ "$FRONTEND_EDGE"/public/fonts/
+        rsync -ar ng-marketplace/distribute/i18n/ "$FRONTEND_EDGE"/public/i18n/
+
+        rsync -ar "$FRONTEND_EDGE"/node_modules/ui-theme/dist/theme/ "$FRONTEND_EDGE"/public/theme/
+    )
+    RESULT=$?
+    rm -rf "$FRONTEND_INSTALL_DIR"
+    [ $RESULT -eq 0 ] || return $RESULT
+
+
+    echo "Installing Frontend API Proxy..." >&2
+    git clone --depth=1 --branch="$API_PROXY_VERSION" --single-branch ssh://git@github.com/cschcs/api-proxy "$FRONTEND_API_PROXY"
+    (
+        cd "$FRONTEND_API_PROXY"
+        npm install
+    )
+    RESULT=$?
+    [ $RESULT -eq 0 ] || return $RESULT
 }
