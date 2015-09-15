@@ -1,0 +1,8 @@
+#!/bin/bash
+
+HAPI_EDGE_VERSION=develop
+API_PROXY_VERSION=develop
+
+MAIN_APP_VERSION=0.0.1
+AGILITY_X_VERSION=v2.1.0
+UI_THEME=default

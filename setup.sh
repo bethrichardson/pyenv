@@ -15,4 +15,5 @@ configure-nodeenv
 configure-macports
 configure-installer
 install-binary-packages
+install-frontend
 deactivate-venv
