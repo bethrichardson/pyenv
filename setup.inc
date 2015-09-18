@@ -241,6 +241,8 @@ function install-pyhome()
     mkdir -p "$PYHOME/$ENV_NAME/bin/ext.d"
     cp "$SCRIPT_DIR/ext.d/"{de,}activate_*_venv "$PYHOME/$ENV_NAME/bin/ext.d/"
     patch -d "$PYHOME/$ENV_NAME/bin" < "$SCRIPT_DIR/activate.patch"
+    mkdir -p ~/pyhome/current/etc
+    cp "$SCRIPT_DIR"/hcsos.config ~/pyhome/current/etc
 }
 
 function configure-bash-profile()
