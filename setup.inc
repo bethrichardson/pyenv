@@ -302,7 +302,7 @@ function configure-nodeenv()
 
     cp "$VIRTUAL_ENV/bin/activate" "$VIRTUAL_ENV/bin/activate.bak"
 
-    nodeenv --verbose -p --prebuilt --iojs --node="$(cat "$SCRIPT_DIR/iojs-version")"
+    nodeenv --verbose -p --prebuilt --node="$(cat "$SCRIPT_DIR/node-version")"
     echo npm version $(npm --version)
     echo nodejs version $(nodejs --version)
     npm install -g code lab gulp
