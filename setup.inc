@@ -167,6 +167,15 @@ function backup-file()
     echo -n "$BAK_FILE"
 }
 
+function assert-not-root()
+{
+    set -eEu
+
+    [ $(id -u) -ne 0 -a $(id -ru) -ne 0 ] || \
+    { echo "PyEnv utilities MUST NOT be run as 'root' directly or via 'su' or 'sudo'." >&2 ; \
+      echo "The scripts will drop into 'root' if and when necessary." >&2 ; return 1; }
+}
+
 function install-prerequisites()
 {
     set -eEu
@@ -179,7 +188,7 @@ function install-prerequisites()
         if [ -z "$(/usr/bin/xcode-select -print-path 2>/dev/null)" ]; then
             echo "Please install Xcode or Command Line Tools first and try again (see popup)!" >&2
             sudo /usr/bin/xcode-select --install
-            exit 1
+            return 1
         fi
         ;;
     esac
@@ -190,8 +199,8 @@ function install-virtualenv()
     set -eEu
 
     if [ -n "${VIRTUAL_ENV:-}" ]; then
-      echo "Please deactivate VirtualEnv '$VIRTUAL_ENV' before (re-)installing!" >&2
-      exit 1
+        echo "Please deactivate VirtualEnv '$VIRTUAL_ENV' before (re-)installing!" >&2
+        return 1
     fi
     echo "Installing VirtualEnv" >&2
     VENV_VERSION="$(cat "$SCRIPT_DIR/venv-version")"
@@ -223,8 +232,8 @@ function install-pyhome()
     mkdir -p "$PYHOME/$ENV_NAME/logs"
     mkdir -p "$PYHOME/$ENV_NAME/db"
     rm -rf "$PYHOME/current" || :
-    (cd "$PYHOME" && ln -s "$ENV_NAME" "current") || exit $?
-    (cd "$PYHOME/current" && ln -s "$SCRIPT_DIR" "pyenv") || exit $?
+    (cd "$PYHOME" && ln -s "$ENV_NAME" "current") || return $?
+    (cd "$PYHOME/current" && ln -s "$SCRIPT_DIR" "pyenv") || return $?
     echo "Created PyHome '$ENV_NAME' from '$SCRIPT_DIR'" >&2
 
     "$PYTHON_USER_BASE"/bin/virtualenv ~/pyhome/current
@@ -243,7 +252,7 @@ function configure-bash-profile()
 
     BASH_PROFILE_BAK="$(backup-file "$BASH_PROFILE")"
     if [ -f "$BASH_PROFILE" ]; then
-      sed_inplace_r "/# PyHome Customization/,/# End PyHome Customization/ d" "$BASH_PROFILE"
+        sed_inplace_r "/# PyHome Customization/,/# End PyHome Customization/ d" "$BASH_PROFILE"
     fi
 
     cat >> "$BASH_PROFILE" <<EOF
@@ -290,7 +299,7 @@ function assert-running-in-venv()
 {
     set -eEu
 
-    [ -n "${VIRTUAL_ENV:-}" ] || { echo "Must be run in an activated VirtualEnv!" >&2; exit 1; }
+    [ -n "${VIRTUAL_ENV:-}" ] || { echo "Must be run in an activated VirtualEnv!" >&2; return 1; }
 }
 
 function configure-nodeenv()
