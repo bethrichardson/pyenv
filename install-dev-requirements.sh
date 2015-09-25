@@ -8,5 +8,7 @@ source "$SCRIPT_DIR/setup.inc"
 assert-not-root
 
 activate-venv
-install-frontend
+
+configure-dev-requirements
+
 deactivate-venv

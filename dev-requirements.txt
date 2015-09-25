@@ -1,0 +1,10 @@
+-r base-requirements.txt
+
+#https://github.com/pybuilder/pybuilder/archive/master.tar.gz
+pybuilder==0.11.0
+
+mock
+unittest-xml-reporting
+coverage
+flake8
+sphinx
