@@ -51,10 +51,10 @@ case "$OSNAME" in
         {
           /bin/sed -r "$@"
         }
-        echo "Detected Linux..."
+        [ -n "${_os_detection_banner:-}" ] || { echo "Detected Linux..." ; _os_detection_banner=x; }
         ;;
     Darwin)
-      echo "Detected Mac OS X (Darwin)..."
+      [ -n "${_os_detection_banner:-}" ] || { echo "Detected Mac OS X (Darwin)..." ; _os_detection_banner=x; }
       which()
       {
         set -eEu
@@ -176,6 +176,13 @@ function assert-not-root()
       echo "The scripts will drop into 'root' if and when necessary." >&2 ; return 1; }
 }
 
+function assert-running-in-venv()
+{
+    set -eEu
+
+    [ -n "${VIRTUAL_ENV:-}" ] || { echo "Must be run in an activated VirtualEnv!" >&2; return 1; }
+}
+
 function install-prerequisites()
 {
     set -eEu
@@ -288,20 +295,13 @@ function deactivate-venv()
     set -eEu
 }
 
-function configure-venv()
+function configure-module-requirements()
 {
     set -eEu
 
-    pip install --upgrade -r "$SCRIPT_DIR"/venv-requirements.txt
-    pip install --upgrade -r "$SCRIPT_DIR"/requirements.txt
-}
+    assert-running-in-venv
 
-
-function assert-running-in-venv()
-{
-    set -eEu
-
-    [ -n "${VIRTUAL_ENV:-}" ] || { echo "Must be run in an activated VirtualEnv!" >&2; return 1; }
+    pip install --upgrade -r "$SCRIPT_DIR"/$1-requirements.txt
 }
 
 function configure-nodeenv()
@@ -456,7 +456,7 @@ function install-frontend() {
     mkdir -p "$FRONTEND_API_PROXY"
 
     echo "Installing Web Frontend (HAPI Edge)..." >&2
-    git clone --depth=1 --branch="$HAPI_EDGE_VERSION" --single-branch ssh://git@github.com/cschcs/hapi-edge-poc "$FRONTEND_EDGE"
+    git clone --depth=1 --branch="$HAPI_EDGE_VERSION" ssh://git@github.com/cschcs/hapi-edge-poc "$FRONTEND_EDGE"
     (
         cd "$FRONTEND_EDGE"
         npm install
@@ -468,8 +468,8 @@ function install-frontend() {
     FRONTEND_INSTALL_DIR="$(mktemp -d -t frontend.XXXXXXXXXX)"
     (
         cd "$FRONTEND_INSTALL_DIR"
-        git clone --depth=1 --branch="$MAIN_APP_VERSION" --single-branch ssh://git@github.com/cschcs/ng-main
-        git clone --depth=1 --branch="$AGILITY_X_VERSION" --single-branch ssh://git@github.com/cschcs/ng-marketplace
+        git clone --depth=1 --branch="$MAIN_APP_VERSION" ssh://git@github.com/cschcs/ng-main
+        git clone --depth=1 --branch="$AGILITY_X_VERSION" ssh://git@github.com/cschcs/ng-marketplace
 
         rsync -ar ng-main/dist/ngmain.js "$FRONTEND_EDGE"/public/app/
         rsync -ar ng-main/dist/themes/"$UI_THEME".js "$FRONTEND_EDGE"/public/app/theme.js
@@ -487,11 +487,41 @@ function install-frontend() {
 
 
     echo "Installing Frontend API Proxy..." >&2
-    git clone --depth=1 --branch="$API_PROXY_VERSION" --single-branch ssh://git@github.com/cschcs/api-proxy "$FRONTEND_API_PROXY"
+    git clone --depth=1 --branch="$API_PROXY_VERSION" ssh://git@github.com/cschcs/api-proxy "$FRONTEND_API_PROXY"
     (
         cd "$FRONTEND_API_PROXY"
         npm install
     )
     RESULT=$?
     [ $RESULT -eq 0 ] || return $RESULT
+}
+
+#
+# $1 - Setup 'dev' or 'prod'
+# $2 - PyHome name (optional, defaults to branch name)
+#
+function setup-common()
+{
+    set -eEu
+
+    assert-not-root
+
+    install-prerequisites
+    install-virtualenv
+    install-pyhome "${2:-}"
+    configure-bash-profile
+
+    activate-venv
+
+    configure-module-requirements 'venv'
+    configure-module-requirements "$1"
+
+    configure-nodeenv
+    configure-macports
+    configure-installer
+    install-binary-packages
+
+    install-frontend
+
+    deactivate-venv
 }

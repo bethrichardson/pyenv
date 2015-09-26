@@ -5,4 +5,4 @@ SCRIPT_DIR="$(cd "$SCRIPT_DIR" && pwd -P)"
 
 source "$SCRIPT_DIR/setup.inc"
 
-configure-venv
+setup-common 'dev' "${1:-}"

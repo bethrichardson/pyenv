@@ -3,10 +3,13 @@
 SCRIPT_DIR="$(dirname "$0")"
 SCRIPT_DIR="$(cd "$SCRIPT_DIR" && pwd -P)"
 
-source "$SCRIPT_DIR"/setup.sh
+source "$SCRIPT_DIR"/setup.inc
+
+setup-common 'prod' "${1:-}"
 
 activate-venv
-pip install cschcs-manager
-hcsos-pg-create
-hcsos-start
+
+hcsos_pg_create
+hcsos_start
+
 deactivate-venv

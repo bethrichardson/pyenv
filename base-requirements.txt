@@ -1,0 +1,10 @@
+nodeenv
+
+PyYAML
+gunicorn
+flask-sqlalchemy
+flask-restful
+Flask-Restless
+sqlalchemy-migrate
+requests
+voluptuous

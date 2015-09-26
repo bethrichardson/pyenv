@@ -2,3 +2,5 @@
 
 pip
 wheel
+setuptools
+virtualenv
