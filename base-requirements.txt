@@ -8,3 +8,4 @@ Flask-Restless
 sqlalchemy-migrate
 requests
 voluptuous
+pg8000
