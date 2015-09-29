@@ -9,6 +9,6 @@ assert-not-root
 
 activate-venv
 
-configure-prod-requirements
+configure-module-requirements prod
 
 deactivate-venv

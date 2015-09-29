@@ -10,6 +10,5 @@ setup-common 'prod' "${1:-}"
 activate-venv
 
 hcsos_pg_create
-hcsos_start
 
 deactivate-venv
