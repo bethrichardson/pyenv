@@ -9,6 +9,6 @@ assert-not-root
 
 activate-venv
 
-configure-dev-requirements
+configure-module-requirements dev
 
 deactivate-venv
