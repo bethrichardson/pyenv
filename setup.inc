@@ -337,7 +337,7 @@ function configure-macports()
         MACPORTS_VERSION="$(cat "$SCRIPT_DIR/macports-version")"
         (
             cd "$VENV_CACHE"
-            curl -L -s -z "MacPorts-$MACPORTS_VERSION.tar.bz2" -R -O "https://distfiles.macports.org/MacPorts/MacPorts-$MACPORTS_VERSION.tar.bz2"
+            curl -L -s -z "MacPorts-$MACPORTS_VERSION.tar.gz" -R -O "http://downloads.sourceforge.net/project/macports/MacPorts/$MACPORTS_VERSION/MacPorts-$MACPORTS_VERSION.tar.gz"
         )
         RESULT=$?
         [ $RESULT -eq 0 ] || return $RESULT
@@ -345,7 +345,7 @@ function configure-macports()
         MACPORTS_INSTALL_DIR="$(mktemp -d -t macports.XXXXXXXXXX)"
         (
             cd "$MACPORTS_INSTALL_DIR"
-            tar -xf "$VENV_CACHE/MacPorts-$MACPORTS_VERSION.tar.bz2"
+            tar -xf "$VENV_CACHE/MacPorts-$MACPORTS_VERSION.tar.gz"
             cd "MacPorts-$MACPORTS_VERSION"
 
             PATH=/bin:/sbin:/usr/bin:/usr/sbin
@@ -401,7 +401,8 @@ EOF
 
         install-venv-extension macports
         sign_local_macports_repository force
-        port sync
+        echo "Syncing MacPorts repository..."
+        port -v sync &> "$VIRTUAL_ENV"/logs/macports-port-sync.log
     fi
 }
 
