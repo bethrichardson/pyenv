@@ -6,6 +6,7 @@ flask-sqlalchemy
 flask-restful
 Flask-Restless
 sqlalchemy-migrate
+marshmallow
 requests
 voluptuous
 pg8000
