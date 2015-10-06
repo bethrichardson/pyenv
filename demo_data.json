@@ -1,0 +1,341 @@
+{
+  "users": [
+    {
+      "username": "review_guy",
+      "email": "email@reviews.com"
+    }
+  ],
+  "orgs": [
+    {
+      "name": "EBG",
+      "description": "Emerging Business Group"
+    },
+    {
+      "name": "Cloud",
+      "parent": "EBG",
+      "parent_type": "Org",
+      "description": "Cloud organization"
+    },
+    {
+      "name": "Open Source",
+      "parent": "EBG",
+      "parent_type": "Org",
+      "description": "Open Source development"
+    }
+  ],
+  "workspaces": [
+    {
+      "name": "HCS",
+      "parent": "Cloud",
+      "parent_type": "Org",
+      "description": "Hybrid Cloud Services"
+    },
+    {
+      "name": "ATT",
+      "parent": "Cloud",
+      "parent_type": "Org",
+      "description": "ATT Network"
+    }
+  ],
+  "environments": [
+    {
+      "name": "DEV",
+      "parent": "HCS",
+      "parent_type": "Workspace",
+      "description": "Env for development"
+    },
+    {
+      "name": "QA",
+      "parent": "HCS",
+      "parent_type": "Workspace",
+      "description": "Env for quality assurance"
+    },
+    {
+      "name": "PROD",
+      "parent": "HCS",
+      "parent_type": "Workspace",
+      "description": "Production environment"
+    }
+  ],
+  "deployments": [
+    {
+      "name": "My Deployment",
+      "parent": "DEV",
+      "parent_type": "Environment",
+      "description": "Super productive deployment"
+    }
+  ],
+  "policys": [
+    {
+      "name": "My Policy",
+      "description": "A policy..."
+    }
+  ],
+  "profiles": [
+    {
+      "name": "HCS User",
+      "email": "user@email.com..."
+    }
+  ],
+  "assigned_blueprints": [],
+  "policy_applications": [],
+  "blueprints": [
+    {
+      "name": "Hadoop",
+      "description": "The Hadoop framework transparently provides both reliability and data motion to applications. Hadoop implements a computational paradigm named MapReduce, where the application is divided into many small fragments of work, each of which may be executed or re-executed on any node in the cluster.",
+      "overview": "Apache Hadoop is an open-source software framework that supports data-intensive distributed applications, licensed under the Apache v2 license. It supports the running of applications on large clusters of commodity hardware.",
+      "thumbnail": "assets/img/thumbnails/hadoop.jpg",
+      "tags": [
+        "Big Data",
+        "Developer Tools"
+      ],
+      "keyFeatures": "Authentication improvements when using an HTTP proxy server.\nA new Hadoop Metrics sink that allows writing directly to Graphite.\nSpecification for Hadoop Compatible Filesystem effort.\nModernized web UIs (HTML5 and Javascript) for HDFS daemons.",
+      "supportInformation": "Supported Product information varies by deployed environment. 99.9999% uptime guarantee for Production Systems. For support related inquiries please email support@goliathnationalbank.com.",
+      "requirements": "10 VM cluster allocation to support multi-nodal distribution set ",
+      "reviews": [
+        {
+          "rating": 8,
+          "title": "This is a good product",
+          "body": "I cannot recommend this enough"
+        },
+        {
+          "rating": 7,
+          "title": "Pretty good!",
+          "body": "I recommend this"
+        },
+        {
+          "rating": 5,
+          "title": "Not sure if...",
+          "body": "I can recommend this."
+        }
+      ],
+      "body": "#######tosca_definitions_version: cloudify_dsl_1_1",
+      "prices": [
+        {
+          "price": 923,
+          "currency": "usd"
+        },
+        {
+          "price": 13,
+          "currency": "usd",
+          "recurs": "monthly"
+        }
+      ],
+      "properties": [
+        {
+          "id": 1,
+          "name": "Comment",
+          "description": "User comments for the blueprint",
+          "inputs": [
+            {
+              "type": "TEXT",
+              "name": "comment",
+              "required": false,
+              "readonly": false,
+              "secure": false,
+              "multi": false,
+              "range": false,
+              "display_name": "Comments",
+              "placeholder": "Please enter a comment on this blueprint...",
+              "options": []
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "Java Application Platform",
+      "thumbnail": "assets/img/thumbnails/java-mysql.jpg",
+      "tags": [
+        "Corporate Standard",
+        "Developer Tools",
+        "Developer Platforms"
+      ],
+      "description": "Multi-Tier Java Application Platform",
+      "requirements": "Deployment authorization for Finance allocation",
+      "keyFeatures": "Tomcat Web Server - Deployed in DMZ for secure Web Authorization.",
+      "supportInformation": "For support, please open a ticket at http://support.goliathnationalbank.com or email support@goliathnationalbank.com"
+    },
+    {
+      "name": "MySQL 5.5",
+      "thumbnail": "assets/img/thumbnails/mysql.png",
+      "tags": [
+        "Corporate Standard",
+        "Developer Tools",
+        "Databases"
+      ],
+      "description": "Consolidated View of all MySQL Servers",
+      "requirements": "Project Plan approval",
+      "keyFeatures": "1. Consolidated View of all MySQL Servers\n2. Server Heat Chart :: Provides at-a-glance, color-coded view in the health, performance and availability of all MySQL servers.",
+      "supportInformation": "For support, please open a ticket at http://support.goliathnationalbank.com or email support@goliathnationalbank.com"
+    },
+    {
+      "name": "MySQL Cluster",
+      "thumbnail": "assets/img/thumbnails/mysql.png",
+      "tags": [
+        "Developer Tools",
+        "Databases"
+      ]
+    },
+    {
+      "name": "RedHat Linux 5.6 - 32 bit Server",
+      "thumbnail": "assets/img/thumbnails/redhat-logo.jpg",
+      "tags": [
+        "Linux",
+        "Developer Tools"
+      ]
+    },
+    {
+      "name": "RedHat Linux 5.6 - 64 bit Server - 9504",
+      "thumbnail": "assets/img/thumbnails/redhat-logo.jpg",
+      "tags": [
+        "Linux",
+        "Developer Tools"
+      ],
+      "description": "Red Hat Enterprise Linux 5, originally released in March 2007, contains more than 1,200 components covering a range of functionality. Red Hat Enterprise Linux gives CIOs and IT managers the means to cut costs while improving operational flexibility throughout their computing infrastructures.",
+      "keyFeatures": "Based on the Linux 2.6.18 kernel, Optimized for multi-core processors, and Continued hardware support for maximum flexibility.",
+      "supportInformation": "For support, please open a ticket at http://support.goliathnationalbank.com or email support@goliathnationalbank.com"
+    },
+    {
+      "name": "RedHat Linux 6.0 - 32 bit Server",
+      "thumbnail": "assets/img/thumbnails/redhat-logo.jpg",
+      "tags": [
+        "Linux",
+        "Developer Tools"
+      ]
+    },
+    {
+      "name": "RedHat Linux 6.0 - 64 bit server",
+      "thumbnail": "assets/img/thumbnails/redhat-logo.jpg",
+      "tags": [
+        "Linux",
+        "Developer Tools"
+      ]
+    },
+    {
+      "name": "Jenkins",
+      "thumbnail": "assets/img/thumbnails/jenkins.png",
+      "tags": [
+        "Productivity",
+        "Developer Tools"
+      ]
+    },
+    {
+      "name": ".Net",
+      "thumbnail": "assets/img/thumbnails/net.png",
+      "requirements": "Deployment authorization for Finance allocation",
+      "tags": [
+        "Developer Tools",
+        "Developer Platforms"
+      ]
+    },
+    {
+      "name": "Salesforce",
+      "thumbnail": "assets/img/thumbnails/salesforce.png",
+      "tags": [
+        "Communications + Messaging"
+      ]
+    },
+    {
+      "name": "NodeJS",
+      "thumbnail": "assets/img/thumbnails/nodejs.png",
+      "tags": [
+        "Productivity",
+        "Developer Tools"
+      ]
+    },
+    {
+      "name": "Confluence",
+      "thumbnail": "assets/img/thumbnails/confluence.png",
+      "tags": [
+        "CMS/Wiki"
+      ]
+    },
+    {
+      "name": "Apache",
+      "thumbnail": "assets/img/thumbnails/apache.png",
+      "tags": [
+        "Developer Tools"
+      ]
+    },
+    {
+      "name": "Team Foundation Server",
+      "thumbnail": "assets/img/thumbnails/tfs.png",
+      "tags": [
+        "Developer Tools"
+      ]
+    }
+  ],
+  "tags": [
+    {
+      "name": "API Management",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Application/PaaS",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Base Stacks and Templates",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Big Data",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "CMS/Wiki",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Communications + Messaging",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Core Communication Services",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Corporate Standard",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Databases",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Desktops",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Developer Platforms",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Developer Tools",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Linux",
+      "applies_to": "blueprint",
+      "type": "Market"
+    },
+    {
+      "name": "Productivity",
+      "applies_to": "blueprint",
+      "type": "Market"
+    }
+  ]
+}

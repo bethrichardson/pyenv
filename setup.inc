@@ -250,6 +250,7 @@ function install-pyhome()
     patch -d "$PYHOME/$ENV_NAME/bin" < "$SCRIPT_DIR/activate.patch"
     mkdir -p ~/pyhome/current/etc
     cp "$SCRIPT_DIR"/hcsos.config ~/pyhome/current/etc
+    cp "$SCRIPT_DIR"/demo_data.json ~/pyhome/current/etc
 }
 
 function configure-bash-profile()
@@ -531,7 +532,7 @@ function setup-db()
 {
     set -eEu
     activate-venv
-    hcsos_pg_create "${1:-}"
+    hcsos_pg_create "${1:-}" "${DEMO_DATA:-$VIRTUAL_ENV/etc/demo_data.json}"
     deactivate-venv
 
 }
