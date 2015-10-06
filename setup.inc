@@ -526,3 +526,12 @@ function setup-common()
 
     deactivate-venv
 }
+
+function setup-db()
+{
+    set -eEu
+    activate-venv
+    hcsos_pg_create "${1:-}"
+    deactivate-venv
+
+}
