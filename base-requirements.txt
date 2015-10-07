@@ -10,3 +10,5 @@ marshmallow
 requests
 voluptuous
 pg8000
+Flask-JWT
+jws
