@@ -515,13 +515,14 @@ function setup-common()
 
     activate-venv
 
+    configure-macports
+    configure-installer
+    install-binary-packages
+
     configure-module-requirements 'venv'
     configure-module-requirements "$1"
 
     configure-nodeenv
-    configure-macports
-    configure-installer
-    install-binary-packages
 
     install-frontend
 
