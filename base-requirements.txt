@@ -9,7 +9,6 @@ sqlalchemy-migrate
 marshmallow
 requests
 voluptuous
-pg8000
 psycopg2
 Flask-JWT
 jws
