@@ -5,6 +5,10 @@ echo "Activating VirtualEnv..."
 set_variable PYHOME PYHOME "$(cd "$VIRTUAL_ENV/.."; pwd -P)"
 set_variable PATH VIRTUAL_PATH '$VIRTUAL_ENV/bin:$PATH'
 set_variable PYTHONHOME VIRTUAL_PYTHONHOME ''
+if [ "$(uname -s)" == 'Darwin' ]; then
+    set_variable LDFLAGS VENV_LDFLAGS "-L$VIRTUAL_ENV/lib"
+    set_variable CFLAGS VENV_CFLAGS "-I$VIRTUAL_ENV/include"
+fi
 
 if [ -z "${VIRTUAL_ENV_DISABLE_PROMPT-}" ] ; then
     if [ "x" != x ] ; then

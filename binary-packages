@@ -5,9 +5,9 @@
 # Development Tools
 Linux   groupinstall Development\ Tools
 
-# CFFI
-Darwin  install libffi
-Linux   install python27-devel libffi-devel
+# CFFI & Cryptography
+Darwin  install openssl libffi
+Linux   install openssl-devel python27-devel libffi-devel
 
 #
 # PostgresSQL 9.4
