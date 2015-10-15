@@ -8,6 +8,10 @@ unset pydoc
 restore_variable PYHOME PYHOME
 restore_variable PATH VIRTUAL_PATH
 restore_variable PYTHONHOME VIRTUAL_PYTHONHOME
+if [ "$(uname -s)" == 'Darwin' ]; then
+    restore_variable LDFLAGS VENV_LDFLAGS
+    restore_variable CFLAGS VENV_CFLAGS
+fi
 
 # This should detect bash and zsh, which have a hash command that must
 # be called to get it to forget past commands.  Without forgetting

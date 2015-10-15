@@ -532,8 +532,10 @@ function setup-common()
 function setup-db()
 {
     set -eEu
-    activate-venv
-    hcsos_pg_create "${1:-}" "${DEMO_DATA:-$VIRTUAL_ENV/etc/demo_data.json}"
-    deactivate-venv
 
+    activate-venv
+
+    hcsos_pg_create "${1:-}" "${DEMO_DATA:-$VIRTUAL_ENV/etc/demo_data.json}"
+
+    deactivate-venv
 }
