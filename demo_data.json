@@ -270,72 +270,72 @@
     {
       "name": "API Management",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Application/PaaS",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Base Stacks and Templates",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Big Data",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "CMS/Wiki",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Communications + Messaging",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Core Communication Services",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Corporate Standard",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Databases",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Desktops",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Developer Platforms",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Developer Tools",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Linux",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     },
     {
       "name": "Productivity",
       "applies_to": "blueprint",
-      "type": "Market"
+      "type": "Market Category"
     }
   ]
 }
