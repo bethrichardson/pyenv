@@ -10,5 +10,7 @@ marshmallow
 requests
 voluptuous
 psycopg2
-Flask-JWT
+Flask-JWT==0.2.0
 jws
+PyJWT
+cryptography
