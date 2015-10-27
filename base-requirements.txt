@@ -1,16 +1,1 @@
 nodeenv
-
-PyYAML
-gunicorn
-flask-sqlalchemy
-flask-restful
-Flask-Restless
-sqlalchemy-migrate
-marshmallow
-requests
-voluptuous
-psycopg2
-Flask-JWT==0.2.0
-jws
-PyJWT
-cryptography
